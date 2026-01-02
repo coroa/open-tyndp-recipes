@@ -12,7 +12,7 @@ source:
   git_rev: v{{ version }}
 
 build:
-  number: 0
+  number: 1
   noarch: generic
   run_exports:
     - {{ pin_subpackage("snakemake", max_pin="x") }}

@@ -10,6 +10,10 @@ on:
 env:
   PREFIX_CHANNEL: open-tyndp
 
+permissions:
+  contents: read
+  id-token: write    # used by rattler-build upload prefix to authenticate us
+
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
@@ -58,12 +62,13 @@ jobs:
         if: steps.detect.outputs.recipes != '[]'
         env:
           PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
-          CHANNEL: ${{ env.PREFIX_CHANNEL }}
         run: |
+          pixi run rattler-build auth login prefix.dev --token $PREFIX_API_KEY
           find ./conda-bld -name "*.conda" | while read pkg; do
-            echo "Uploading $(basename $pkg) to $CHANNEL"
-            pixi run rattler-build upload prefix --channel $CHANNEL "$pkg"
+            echo "Uploading $(basename $pkg) to $PREFIX_CHANNEL"
+            pixi run rattler-build upload prefix --channel $PREFIX_CHANNEL "$pkg"
           done
+          pixi run rattler-build auth logout prefix.dev
 
       - name: Build summary
         if: steps.detect.outputs.recipes != '[]'

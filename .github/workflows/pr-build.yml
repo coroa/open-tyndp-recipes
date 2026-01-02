@@ -5,6 +5,10 @@ on:
     paths:
       - 'recipes/**'
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -50,6 +54,7 @@ jobs:
 
       - name: Upload build artifacts
         if: steps.detect.outputs.recipes != '[]'
+        id: upload-artifact
         uses: actions/upload-artifact@v4
         with:
           name: conda-packages
@@ -62,11 +67,13 @@ jobs:
         with:
           script: |
             const recipes = ${{ steps.detect.outputs.recipes }};
+            const artifactUrl = '${{ steps.upload-artifact.outputs.artifact-url }}';
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `✅ Successfully built recipes: ${recipes.join(', ')}\n\nDownload the artifacts to test locally before merging.`
+              body: `✅ Successfully built recipes: ${recipes.join(', ')}\n\n[Download the artifacts](${artifactUrl}) to test locally before merging.`
             })
 
       - name: Build summary
