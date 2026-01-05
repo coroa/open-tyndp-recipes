@@ -12,7 +12,6 @@ env:
 
 permissions:
   contents: read
-  id-token: write    # used by rattler-build upload prefix to authenticate us
 
 jobs:
   build-and-upload:
