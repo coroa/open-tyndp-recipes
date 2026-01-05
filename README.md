@@ -8,7 +8,8 @@ Custom conda package recipes for the OpenTYNDP project, built and published to p
 .
 ├── .github/
 │   └── workflows/
-│       └── build-recipes.yml    # CI/CD workflow for building and uploading
+|       ├── build-and-upload.yml # CI/CD workflow for building and uploading
+│       └── pr-build.yml         # CI/CD workflow for PR test builds
 ├── recipes/
 │   └── snakemake/               # Custom snakemake build
 │       └── meta.yaml
@@ -22,7 +23,8 @@ Install packages from our custom channel:
 
 ```bash
 # With pixi
-pixi add --channel https://prefix.dev/open-tyndp snakemake-minimal
+pixi workspace channel add https://prefix.dev/open-tyndp 
+pixi add "https://prefix.dev/open-tyndp::snakemake-minimal >=9"
 
 # With conda/mamba
 conda install -c https://prefix.dev/open-tyndp snakemake-minimal
@@ -35,14 +37,28 @@ conda install -c https://prefix.dev/open-tyndp snakemake-minimal
 3. Create a PR - the workflow will automatically build and test
 4. Once merged to `main`, packages are automatically uploaded to prefix.dev
 
+### From conda-forge or bioconda-recipes packages
+
+1. Copy the directory containing the meta.yaml file for the targeted package from its
+   conda-forge feedstock or the bioconda-recipes repository.
+2. Add a [local version identifier](https://packaging.python.org/en/latest/specifications/version-specifiers/#local-version-identifiers)
+   to the version, like `9.15.3+opentyndp` or `9.15.3+opentyndp.1`.
+3. Update the source to something like:
+   
+   ```yaml
+   source:
+     git_url: https://github.com/coroa/snakemake.git
+     git_rev: v{{ version }}
+   ```
+4. Add setuptools-scm to the host requirements section
+5. Create a PR to build and test
+
+
 ## Local Development
 
 Build recipes locally using pixi:
 
 ```bash
-# Install dependencies
-pixi install
-
 # Build a specific recipe
 pixi run build recipes/snakemake
 
@@ -56,17 +72,6 @@ The repository uses GitHub Actions to:
 
 - **On Pull Requests**: Build changed recipes and upload as artifacts for testing
 - **On Merge to Main**: Build and upload packages to prefix.dev channel
-
-### Setup
-
-Add the following secret to your GitHub repository:
-- `PREFIX_API_KEY`: Your prefix.dev API token
-
-Update the channel name in `.github/workflows/build-recipes.yml`:
-```yaml
-env:
-  PREFIX_CHANNEL: your-username/your-channel
-```
 
 ## Recipe Guidelines
 
