@@ -1,7 +1,7 @@
 # Attention: when upgrading the version, please compare below dependencies with
 # https://github.com/snakemake/snakemake/blob/{version}/setup.cfg
 {% set name = "snakemake" %}
-{% set version = "9.15.0+opentyndp" %}
+{% set version = "9.16.2+opentyndp" %}
 
 package:
   name: {{ name }}
